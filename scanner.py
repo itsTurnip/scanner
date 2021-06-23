@@ -13,7 +13,7 @@ class Scanner(BaseReader):
         self.pins = pins
         self.last_card = None
         self.last_send = None
-        self.offline = False
+        self.offline = True
         self.offline_checks_interval = offline_checks_interval
         super().__init__(serial, **kwargs)
 
@@ -25,12 +25,14 @@ class Scanner(BaseReader):
         if r == None:
             self.offline = True
             self.pins.problem()
-        elif r:
-            self.pins.ok()
         else:
-            self.pins.not_found()
+            if r:
+                self.pins.ok()
+            else:
+                self.pins.not_found()
+            if self.offline:
+                self.send_offline()
         self.last_card = card[0]
-        self.send_offline()
 
     def close(self):
         self.connector.close()
